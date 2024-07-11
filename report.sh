@@ -1,13 +1,13 @@
 #!/bin/bash
 
 source ~/.bash_profile
-id=$NUBIT_ID
-chain=nubit-alphatestnet-1
+id=$GAIANET_ID
+chain=?
 network=testnet
-type="light node"
+type="node"
 group=node
 
-version=$(/root/nubit-node/bin/nubit version | grep "Semantic version" | awk '{print $3}')
+version=$(gaianet --version | awk '{print $NF}')
 
 #health=$(curl -sS -I "http://localhost:7000/health" | head -1 | awk '{print $2}')
 #if [ -z $health ]; then health=null; fi
@@ -16,9 +16,10 @@ version=$(/root/nubit-node/bin/nubit version | grep "Semantic version" | awk '{p
 # *)   status=warning;message="health - $health" ;;
 #esac
 
-service=$(sudo systemctl status nubit-lightd --no-pager | grep "active (running)" | wc -l)
-if [ $service -ne 1 ]
-then status="error"; message="service not running";
+pid=$(pidof qdrant)
+
+if [ -z $pid ]
+then status="error"; message="qdrant not running";
 else status="ok";
 fi
 
@@ -32,8 +33,7 @@ cat << EOF
   "type":"node",
   "status":"$status",
   "message":"$message",
-  "service":$service,
-  "health":$health,
+  "pid":$pid,
   "updated":"$(date --utc +%FT%TZ)"
 }
 EOF
